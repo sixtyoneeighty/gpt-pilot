@@ -69,6 +69,7 @@ GPT Pilot is the core technology for the [Pythagora VS Code extension](https://b
 * [🍻 Contributing](#-contributing)
 * [🔗 Connect with us](#-connect-with-us)
 * [🌟 Star history](#-star-history)
+* [🤖 Supported LLM Providers and Models](#-supported-llm-providers-and-models)
 <!-- TOC -->
 
 ---
@@ -210,3 +211,39 @@ To improve GPT Pilot, we are tracking some events from which you can opt out at 
 🌟 As an open-source tool, it would mean the world to us if you starred the GPT-pilot repo 🌟
 
 💬 Join [the Discord server](https://discord.gg/HaqXugmxr9) to get in touch.
+
+# 🤖 Supported LLM Providers and Models
+
+GPT Pilot supports multiple LLM providers and models:
+
+## OpenAI
+- **gpt-4o-latest** - Latest version of GPT-4o
+- **gpt-4.5-preview** - Preview version of GPT-4.5
+- **gpt-4o-2024-05-13** - Specific version of GPT-4o (default)
+- **gpt-4o-mini-2024-07-18** - Mini version of GPT-4o
+
+## Anthropic
+- **claude-3-5-sonnet-20241022** - Claude 3.5 Sonnet (latest version)
+- **claude-3-5-sonnet-20240620** - Claude 3.5 Sonnet
+- **claude-3-sonnet-20240229** - Claude 3 Sonnet
+- **claude-3-haiku-20240307** - Claude 3 Haiku
+- **claude-3-opus-20240229** - Claude 3 Opus
+
+## Amazon Bedrock
+- **anthropic.claude-3-7-sonnet-20250219-v1:0** - Claude 3.7 Sonnet via Amazon Bedrock
+
+To use Amazon Bedrock, you need to:
+1. Set up your AWS credentials
+2. Configure the `bedrock` provider in your `config.json` file:
+```json
+{
+  "llm": {
+    "bedrock": {
+      "api_key": "YOUR_BEDROCK_API_KEY",
+      "base_url": "https://bedrock-runtime.YOUR_REGION.amazonaws.com/model/anthropic/claude-3-7-sonnet-20250219-v1:0"
+    }
+  }
+}
+```
+
+You can test the available models using the sample script at `scripts/model_demo.py`.

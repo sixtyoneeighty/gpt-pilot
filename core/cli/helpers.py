@@ -18,6 +18,7 @@ from core.ui.base import UIBase
 from core.ui.console import PlainConsoleUI
 from core.ui.ipc_client import IPCClientUI
 from core.ui.virtual import VirtualUI
+from core.ui.web_server import WebUIServer
 
 
 def parse_llm_endpoint(value: str) -> Optional[tuple[LLMProvider, str]]:
@@ -84,6 +85,10 @@ def parse_arguments() -> Namespace:
         --database: Database URL
         --local-ipc-port: Local IPC port to connect to
         --local-ipc-host: Local IPC host to connect to
+        --web-ui: Use web UI instead of console UI
+        --web-host: Web UI host to listen on (default: localhost)
+        --web-port: Web UI port to listen on (default: 8080)
+        --web-static-path: Path to web UI static files
         --version: Show the version and exit
         --list: List all projects
         --list-json: List all projects in JSON format
@@ -108,6 +113,10 @@ def parse_arguments() -> Namespace:
     parser.add_argument("--database", help="Database URL", required=False)
     parser.add_argument("--local-ipc-port", help="Local IPC port to connect to", type=int, required=False)
     parser.add_argument("--local-ipc-host", help="Local IPC host to connect to", default="localhost", required=False)
+    parser.add_argument("--web-ui", help="Use web UI instead of console UI", action="store_true")
+    parser.add_argument("--web-host", help="Web UI host to listen on", default="localhost", required=False)
+    parser.add_argument("--web-port", help="Web UI port to listen on", type=int, default=8080, required=False)
+    parser.add_argument("--web-static-path", help="Path to web UI static files", required=False)
     parser.add_argument("--version", action="version", version=version)
     parser.add_argument("--list", help="List all projects", action="store_true")
     parser.add_argument("--list-json", help="List all projects in JSON format", action="store_true")
@@ -168,6 +177,14 @@ def load_config(args: Namespace) -> Optional[Config]:
 
     if args.local_ipc_port:
         config.ui = LocalIPCConfig(port=args.local_ipc_port, host=args.local_ipc_host)
+    
+    if args.web_ui:
+        from core.config import WebUIConfig
+        config.ui = WebUIConfig(
+            host=args.web_host,
+            port=args.web_port,
+            static_path=args.web_static_path
+        )
 
     if args.llm_endpoint:
         for provider, endpoint in args.llm_endpoint:
@@ -320,6 +337,8 @@ def init() -> tuple[UIBase, SessionManager, Namespace]:
         ui = IPCClientUI(config.ui)
     elif config.ui.type == UIAdapter.VIRTUAL:
         ui = VirtualUI(config.ui.inputs)
+    elif config.ui.type == UIAdapter.WEB:
+        ui = WebUIServer(config.ui)
     else:
         ui = PlainConsoleUI()
 

@@ -72,6 +72,7 @@ class LLMProvider(str, Enum):
     GROQ = "groq"
     LM_STUDIO = "lm-studio"
     AZURE = "azure"
+    BEDROCK = "bedrock"
 
 
 class UIAdapter(str, Enum):
@@ -82,6 +83,7 @@ class UIAdapter(str, Enum):
     PLAIN = "plain"
     IPC_CLIENT = "ipc-client"
     VIRTUAL = "virtual"
+    WEB = "web"
 
 
 class ProviderConfig(_StrictModel):
@@ -276,8 +278,22 @@ class VirtualUIConfig(_StrictModel):
     inputs: list[Any]
 
 
+class WebUIConfig(_StrictModel):
+    """
+    Configuration for Web UI server.
+    """
+
+    type: Literal[UIAdapter.WEB] = UIAdapter.WEB
+    host: str = "localhost"
+    port: int = 8080
+    static_path: Optional[str] = Field(
+        join(ROOT_DIR, "web", "dist"),
+        description="Path to static files for the web UI frontend",
+    )
+
+
 UIConfig = Annotated[
-    Union[PlainUIConfig, LocalIPCConfig, VirtualUIConfig],
+    Union[PlainUIConfig, LocalIPCConfig, VirtualUIConfig, WebUIConfig],
     Field(discriminator="type"),
 ]
 
@@ -320,11 +336,16 @@ class Config(_StrictModel):
         default={
             LLMProvider.OPENAI: ProviderConfig(),
             LLMProvider.ANTHROPIC: ProviderConfig(),
+            LLMProvider.BEDROCK: ProviderConfig(),
         }
     )
     agent: dict[str, AgentLLMConfig] = Field(
         default={
-            DEFAULT_AGENT_NAME: AgentLLMConfig(),
+            DEFAULT_AGENT_NAME: AgentLLMConfig(
+                provider=LLMProvider.OPENAI,
+                model="gpt-4o-2024-05-13",
+                temperature=0.5,
+            ),
             CHECK_LOGS_AGENT_NAME: AgentLLMConfig(
                 provider=LLMProvider.ANTHROPIC,
                 model="claude-3-5-sonnet-20241022",
@@ -501,6 +522,7 @@ def adapt_for_bedrock(config: Config) -> Config:
         "claude-3-sonnet-20240229": "us.anthropic.claude-3-sonnet-20240229-v1:0",
         "claude-3-haiku-20240307": "us.anthropic.claude-3-haiku-20240307-v1:0",
         "claude-3-opus-20240229": "us.anthropic.claude-3-opus-20240229-v1:0",
+        "claude-3-7-sonnet-20250219": "anthropic.claude-3-7-sonnet-20250219-v1:0",
     }
 
     for agent in config.agent:

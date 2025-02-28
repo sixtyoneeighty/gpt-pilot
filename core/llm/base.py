@@ -332,6 +332,7 @@ class BaseLLMClient:
         """
         from .anthropic_client import AnthropicClient
         from .azure_client import AzureClient
+        from .bedrock_client import BedrockClient
         from .groq_client import GroqClient
         from .openai_client import OpenAIClient
 
@@ -343,6 +344,8 @@ class BaseLLMClient:
             return GroqClient
         elif provider == LLMProvider.AZURE:
             return AzureClient
+        elif provider == LLMProvider.BEDROCK:
+            return BedrockClient
         else:
             raise ValueError(f"Unsupported LLM provider: {provider.value}")
 
